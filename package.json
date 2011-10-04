@@ -1,0 +1,23 @@
+{
+  "author": "Paul Dixon <paul.dixon@mintbridge.co.uk>",
+  "contributors": [
+    { "name": "Alex Whitman", "email": "alex@alexwhitman.com" },
+    { "name": "Paul Dixon", "email": "paul.dixon@mintbridge.co.uk" }
+  ],
+  "name": "dobot-irc",
+  "description": "A dobot module for IRC communcation",
+  "version": "0.0.0",
+  "homepage": "http://dobot.github.com/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dobot/dobot.git"
+  },
+  "keywords": ["bot"],
+  "engines": {
+    "node": ">=0.4.x"
+  },
+  "dependencies": {
+	  "irc": ">=0.2.1"
+  },
+  "devDependencies": {}
+}
