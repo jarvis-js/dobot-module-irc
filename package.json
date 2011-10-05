@@ -4,7 +4,7 @@
     { "name": "Alex Whitman", "email": "alex@alexwhitman.com" },
     { "name": "Paul Dixon", "email": "paul.dixon@mintbridge.co.uk" }
   ],
-  "name": "dobot-irc",
+  "name": "dobot-module-irc",
   "description": "A dobot module for IRC communcation",
   "version": "0.0.0",
   "homepage": "http://dobot.github.com/",
