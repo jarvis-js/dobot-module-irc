@@ -6,37 +6,44 @@ module.exports = function(bot) {
 
 	ircModule.load = function(options) {
 		this.clients = [];
-		var self = this;
 		if (options.connections) {
 			for (var i = 0; i < options.connections.length; i++) {
 				var current = options.connections[i];
 				var client = new irc.Client(current.host, current.nick, current.options);
 				this.clients.push(client);
 
-				client.addListener('message', function (from, channel, message) {
-					var client = this;
-					var regex = /^dobot,? /i;
-					if (regex.test(message)) {
-						message = message.replace(regex, '');
-						var request = {
-							user: from,
-							command: message
-						};
-						bot.exec(request, function(response) {
-							client.say(channel, response);
-						});
-					}
-				});
+				client.addListener('raw', function(raw) {
+					switch (raw.command) {
+						case "PRIVMSG":
+							var from = raw.nick;
+							var to = raw.args[0];
+							var text = raw.args[1];
 
-				client.addListener('pm', function(from, message) {
-					var client = this;
-					var request = {
-						user: from,
-						command: message
-					};
-					bot.exec(request, function(response) {
-						client.say(from, response);
-					})
+							var request = {
+								user: from
+							}
+
+							// Channel message
+							// 'to' is the channel name
+							if (to.match(/^[&#]/)) {
+								var regex = /^dobot,? /i;
+								if (regex.test(text)) {
+									text = text.replace(regex, '');
+									request.command = text;
+									bot.exec(request, function(response) {
+										client.say(to, response);
+									});
+								}
+							}
+							// Private message to bot
+							else if (to == client.nick) {
+								request.command = text;
+								bot.exec(request, function(response) {
+									client.say(from, response);
+								})
+							}
+							break;
+					}
 				});
 			}
 		}
