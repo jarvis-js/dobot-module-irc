@@ -8,6 +8,7 @@ module.exports = function(bot) {
 		var module = this;
 
 		this.clients = [];
+
 		if (options.connections) {
 			for (var i = 0; i < options.connections.length; i++) {
 				var current = options.connections[i];
@@ -21,48 +22,32 @@ module.exports = function(bot) {
 							var to = raw.args[0];
 							var text = raw.args[1];
 
-							var request = {
-								user: from
-							}
-
 							// Channel message
 							// 'to' is the channel name
 							if (to.match(/^[&#]/)) {
 								var regex = new RegExp('^' + client.nick + ',? ', 'i');
 								if (regex.test(text)) {
 									text = text.replace(regex, '');
-									request.command = text;
-									request.channel = module.makeChannelIdentifier(client, to);
-									bot.execCommand(request);
+									var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+									channel.emit('message', text, from);
 								}
 							}
 							// Private message to bot
 							else if (to == client.nick) {
-								var pmChannel = new bot.Channel();
-								pmChannel.module = module.name;
-								pmChannel.identifier = module.makeChannelIdentifier(client, from);
-								pmChannel.say = function(message) {
+								var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(message) {
 									client.say(from, message);
-								};
-								bot.registerChannel(pmChannel);
-
-								request.command = text;
-								request.channel = module.makeChannelIdentifier(client, from);
-								bot.execCommand(request);
+								});
+								channel.emit('message', text, from);
 							}
 							break;
 					}
 				});
 
-				client.addListener('join', function(channel, nick) {
+				client.addListener('join', function(joinedChannel, nick) {
 					if (nick === client.nick) {
-						var ircChannel = new bot.Channel();
-						ircChannel.module = module.name;
-						ircChannel.identifier = module.makeChannelIdentifier(client, channel);
-						ircChannel.say = function(message) {
-							client.say(channel, message);
-						};
-						bot.registerChannel(ircChannel);
+						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(message) {
+							client.say(joinedChannel, message);
+						});
 					}
 				});
 			}
@@ -77,6 +62,25 @@ module.exports = function(bot) {
 
 	ircModule.makeChannelIdentifier = function(client, channel) {
 		return 'irc:' + client.opt.server + ':' + channel;
+	}
+
+	ircModule.addChannel = function(channelID, say) {
+		if (bot.channels[channelID]) {
+			return bot.channels[channelID];
+		}
+		var channel = new bot.Channel();
+		channel.module = module.name;
+		channel.identifier = channelID;
+		channel.say = say;
+		bot.registerChannel(channel);
+		return channel;
+	}
+
+	ircModule.getChannel = function(channelID) {
+		if (bot.channels[channelID]) {
+			return bot.channels[channelID];
+		}
+		return false;
 	}
 
 	return ircModule;
