@@ -5,6 +5,8 @@ module.exports = function(bot) {
 	ircModule = new bot.Module();
 
 	ircModule.load = function(options) {
+		var module = this;
+
 		this.clients = [];
 		if (options.connections) {
 			for (var i = 0; i < options.connections.length; i++) {
@@ -26,23 +28,41 @@ module.exports = function(bot) {
 							// Channel message
 							// 'to' is the channel name
 							if (to.match(/^[&#]/)) {
-								var regex = /^dobot,? /i;
+								var regex = new RegExp('^' + client.nick + ',? ', 'i');
 								if (regex.test(text)) {
 									text = text.replace(regex, '');
 									request.command = text;
-									bot.exec(request, function(response) {
-										client.say(to, response);
-									});
+									request.channel = module.makeChannelIdentifier(client, to);
+									bot.execCommand(request);
 								}
 							}
 							// Private message to bot
 							else if (to == client.nick) {
+								var pmChannel = new bot.Channel();
+								pmChannel.module = module.name;
+								pmChannel.identifier = module.makeChannelIdentifier(client, from);
+								pmChannel.say = function(message) {
+									client.say(from, message);
+								};
+								bot.registerChannel(pmChannel);
+
 								request.command = text;
-								bot.exec(request, function(response) {
-									client.say(from, response);
-								})
+								request.channel = module.makeChannelIdentifier(client, from);
+								bot.execCommand(request);
 							}
 							break;
+					}
+				});
+
+				client.addListener('join', function(channel, nick) {
+					if (nick === client.nick) {
+						var ircChannel = new bot.Channel();
+						ircChannel.module = module.name;
+						ircChannel.identifier = module.makeChannelIdentifier(client, channel);
+						ircChannel.say = function(message) {
+							client.say(channel, message);
+						};
+						bot.registerChannel(ircChannel);
 					}
 				});
 			}
@@ -55,6 +75,10 @@ module.exports = function(bot) {
 		}
 	};
 
+	ircModule.makeChannelIdentifier = function(client, channel) {
+		return 'irc:' + client.opt.server + ':' + channel;
+	}
+
 	return ircModule;
 
-}
+};
