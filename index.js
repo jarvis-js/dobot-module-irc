@@ -12,6 +12,7 @@ module.exports = function(bot) {
 		if (options.connections) {
 			for (var i = 0; i < options.connections.length; i++) {
 				var current = options.connections[i];
+				current.options.stripColors = true;
 				var client = new irc.Client(current.host, current.nick, current.options);
 				this.clients.push(client);
 
