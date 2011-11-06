@@ -35,8 +35,8 @@ module.exports = function(bot) {
 							}
 							// Private message to bot
 							else if (to == client.nick) {
-								var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(message) {
-									client.say(from, message);
+								var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(response) {
+									client.say(from, response.reply);
 								});
 								channel.emit('message', text, from);
 							}
@@ -46,8 +46,8 @@ module.exports = function(bot) {
 
 				client.addListener('join', function(joinedChannel, nick) {
 					if (nick === client.nick) {
-						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(message) {
-							client.say(joinedChannel, message);
+						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(response) {
+							client.say(joinedChannel, response.usernick + ': ' + response.reply);
 						});
 					}
 				});
