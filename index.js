@@ -2,11 +2,9 @@ var irc = require('irc');
 
 module.exports = function(bot) {
 
-	ircModule = new bot.Module();
+	var module = new bot.Module();
 
-	ircModule.load = function(options) {
-		var module = this;
-
+	module.load = function(options) {
 		this.clients = [];
 
 		if (options.connections) {
@@ -55,17 +53,17 @@ module.exports = function(bot) {
 		}
 	};
 
-	ircModule.unload = function() {
+	module.unload = function() {
 		for (var i = 0; i < this.clients.length; i++) {
 			this.clients[i].disconnect();
 		}
 	};
 
-	ircModule.makeChannelIdentifier = function(client, channel) {
+	module.makeChannelIdentifier = function(client, channel) {
 		return 'irc:' + client.opt.server + ':' + channel;
 	}
 
-	ircModule.addChannel = function(channelID, say) {
+	module.addChannel = function(channelID, say) {
 		if (bot.channels[channelID]) {
 			return bot.channels[channelID];
 		}
@@ -77,13 +75,13 @@ module.exports = function(bot) {
 		return channel;
 	}
 
-	ircModule.getChannel = function(channelID) {
+	module.getChannel = function(channelID) {
 		if (bot.channels[channelID]) {
 			return bot.channels[channelID];
 		}
 		return false;
 	}
 
-	return ircModule;
+	return module;
 
 };
