@@ -17,23 +17,17 @@ module.exports = function(bot) {
 				client.addListener('message', function(from, to, message) {
 					var regex = new RegExp('^' + client.nick + ',? ', 'i');
 					var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+					var messageData = {
+						message: message,
+						usernick: from,
+						direct: false
+					};
 					if (regex.test(message)) {
 						message = message.replace(regex, '');
-						var messageData = {
-							message: message,
-							usernick: from,
-							direct: true
-						};
-						channel.emit('message', messageData);
+						messageData.message = message;
+						messageData.direct = true;
 					}
-					else {
-						var messageData = {
-							message: message,
-							usernick: from,
-							direct: false
-						};
-						channel.emit('message', messageData);
-					}
+					channel.emit('message', messageData);
 				});
 
 				client.addListener('pm', function(from, message) {
