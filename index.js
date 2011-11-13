@@ -16,18 +16,14 @@ module.exports = function(bot) {
 
 				client.addListener('message', function(from, to, message) {
 					var regex = new RegExp('^' + client.nick + ',? ', 'i');
-					var channel = module.getChannel(module.makeChannelIdentifier(client, to));
-					var messageData = {
-						message: message,
-						usernick: from,
-						direct: false
-					};
 					if (regex.test(message)) {
-						message = message.replace(regex, '');
-						messageData.message = message;
-						messageData.direct = true;
+						var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+						var messageData = {
+							message: message.replace(regex, ''),
+							usernick: from
+						};
+						channel.emit('message', messageData);
 					}
-					channel.emit('message', messageData);
 				});
 
 				client.addListener('pm', function(from, message) {
@@ -36,8 +32,7 @@ module.exports = function(bot) {
 					});
 					var messageData = {
 						message: message,
-						usernick: from,
-						direct: true
+						usernick: from
 					};
 					channel.emit('message', messageData);
 				});
@@ -45,11 +40,7 @@ module.exports = function(bot) {
 				client.addListener('join', function(joinedChannel, nick) {
 					if (nick === client.nick) {
 						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(response) {
-							var reply = response.reply;
-							if (response.direct) {
-								reply = response.usernick + ': ' + reply;
-							}
-							client.say(joinedChannel, reply);
+							client.say(joinedChannel, response.usernick + ': ' + response.reply);
 						});
 					}
 				});
