@@ -25,10 +25,23 @@ module.exports = function(bot) {
 							// 'to' is the channel name
 							if (to.match(/^[&#]/)) {
 								var regex = new RegExp('^' + client.nick + ',? ', 'i');
+								var channel = module.getChannel(module.makeChannelIdentifier(client, to));
 								if (regex.test(text)) {
 									text = text.replace(regex, '');
-									var channel = module.getChannel(module.makeChannelIdentifier(client, to));
-									channel.emit('message', text, from);
+									var messageData = {
+										message: text,
+										usernick: from,
+										direct: true
+									};
+									channel.emit('message', messageData);
+								}
+								else {
+									var messageData = {
+										message: text,
+										usernick: from,
+										direct: false
+									};
+									channel.emit('message', messageData);
 								}
 							}
 							// Private message to bot
@@ -36,7 +49,12 @@ module.exports = function(bot) {
 								var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(response) {
 									client.say(from, response.reply);
 								});
-								channel.emit('message', text, from);
+								var messageData = {
+									message: text,
+									usernick: from,
+									direct: true
+								};
+								channel.emit('message', messageData);
 							}
 							break;
 					}
@@ -45,7 +63,11 @@ module.exports = function(bot) {
 				client.addListener('join', function(joinedChannel, nick) {
 					if (nick === client.nick) {
 						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(response) {
-							client.say(joinedChannel, response.usernick + ': ' + response.reply);
+							var reply = response.reply;
+							if (response.direct) {
+								reply = response.usernick + ': ' + reply;
+							}
+							client.say(joinedChannel, reply);
 						});
 					}
 				});
