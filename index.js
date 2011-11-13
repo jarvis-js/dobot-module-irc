@@ -5,14 +5,14 @@ module.exports = function(bot) {
 	var module = new bot.Module();
 
 	module.load = function(options) {
-		this.clients = [];
+		module.clients = [];
 
 		if (options.connections) {
 			for (var i = 0; i < options.connections.length; i++) {
 				var current = options.connections[i];
 				current.options.stripColors = true;
 				var client = new irc.Client(current.host, current.nick, current.options);
-				this.clients.push(client);
+				module.clients.push(client);
 
 				client.addListener('message', function(from, to, message) {
 					var regex = new RegExp('^' + client.nick + ',? ', 'i');
@@ -49,8 +49,8 @@ module.exports = function(bot) {
 	};
 
 	module.unload = function() {
-		for (var i = 0; i < this.clients.length; i++) {
-			this.clients[i].disconnect();
+		for (var i = 0; i < module.clients.length; i++) {
+			module.clients[i].disconnect();
 		}
 	};
 
