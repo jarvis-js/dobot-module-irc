@@ -14,50 +14,38 @@ module.exports = function(bot) {
 				var client = new irc.Client(current.host, current.nick, current.options);
 				this.clients.push(client);
 
-				client.addListener('raw', function(raw) {
-					switch (raw.command) {
-						case "PRIVMSG":
-							var from = raw.nick;
-							var to = raw.args[0];
-							var text = raw.args[1];
-
-							// Channel message
-							// 'to' is the channel name
-							if (to.match(/^[&#]/)) {
-								var regex = new RegExp('^' + client.nick + ',? ', 'i');
-								var channel = module.getChannel(module.makeChannelIdentifier(client, to));
-								if (regex.test(text)) {
-									text = text.replace(regex, '');
-									var messageData = {
-										message: text,
-										usernick: from,
-										direct: true
-									};
-									channel.emit('message', messageData);
-								}
-								else {
-									var messageData = {
-										message: text,
-										usernick: from,
-										direct: false
-									};
-									channel.emit('message', messageData);
-								}
-							}
-							// Private message to bot
-							else if (to == client.nick) {
-								var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(response) {
-									client.say(from, response.reply);
-								});
-								var messageData = {
-									message: text,
-									usernick: from,
-									direct: true
-								};
-								channel.emit('message', messageData);
-							}
-							break;
+				client.addListener('message', function(from, to, message) {
+					var regex = new RegExp('^' + client.nick + ',? ', 'i');
+					var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+					if (regex.test(message)) {
+						message = message.replace(regex, '');
+						var messageData = {
+							message: message,
+							usernick: from,
+							direct: true
+						};
+						channel.emit('message', messageData);
 					}
+					else {
+						var messageData = {
+							message: message,
+							usernick: from,
+							direct: false
+						};
+						channel.emit('message', messageData);
+					}
+				});
+
+				client.addListener('pm', function(from, message) {
+					var channel = module.addChannel(module.makeChannelIdentifier(client, from), function(response) {
+						client.say(from, response.reply);
+					});
+					var messageData = {
+						message: message,
+						usernick: from,
+						direct: true
+					};
+					channel.emit('message', messageData);
 				});
 
 				client.addListener('join', function(joinedChannel, nick) {
