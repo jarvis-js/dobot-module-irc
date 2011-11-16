@@ -15,14 +15,18 @@ module.exports = function(bot) {
 				module.clients.push(client);
 
 				client.addListener('message', function(from, to, message) {
-					var regex = new RegExp('^' + client.nick + ',? ', 'i');
-					if (regex.test(message)) {
-						var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+					var channel = module.getChannel(module.makeChannelIdentifier(client, to));
+					if (channel !== false) {
 						var messageData = {
-							message: message.replace(regex, ''),
+							message: message,
 							usernick: from
 						};
 						channel.emit('message', messageData);
+						var regex = new RegExp('^' + client.nick + ',? ', 'i');
+						if (regex.test(message)) {
+							messageData.message = messageData.message.replace(regex, '');
+							channel.emit('command', messageData);
+						}
 					}
 				});
 
@@ -35,12 +39,17 @@ module.exports = function(bot) {
 						usernick: from
 					};
 					channel.emit('message', messageData);
+					channel.emit('command', messageData);
 				});
 
 				client.addListener('join', function(joinedChannel, nick) {
 					if (nick === client.nick) {
 						module.addChannel(module.makeChannelIdentifier(client, joinedChannel), function(response) {
-							client.say(joinedChannel, response.usernick + ': ' + response.reply);
+							var message = response.reply;
+							if (response.type === 'command') {
+								message = response.usernick + ': ' + message;
+							}
+							client.say(joinedChannel, message);
 						});
 					}
 				});
