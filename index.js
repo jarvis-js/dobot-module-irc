@@ -7,9 +7,12 @@ module.exports = function(bot) {
 	module.load = function(options) {
 		module.clients = [];
 
-		if (options.connections) {
-			for (var i = 0; i < options.connections.length; i++) {
-				var current = options.connections[i];
+		if (options.connection) {
+			if (!options.connection instanceof Array) {
+				options.connection = [ options.connection ];
+			}
+			for (var i = 0; i < options.connection.length; i++) {
+				var current = options.connection[i];
 				current.options.stripColors = true;
 				var client = new irc.Client(current.host, current.nick, current.options);
 				module.clients.push(client);
