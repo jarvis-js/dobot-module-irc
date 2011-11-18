@@ -5,7 +5,7 @@ module.exports = function(bot, module) {
 	module.load = function(options) {
 		module.adaptors = [];
 		if (options.connection) {
-			if(!Array.isArray(options.connection)) {
+			if (!Array.isArray(options.connection)) {
 				options.connection = [ options.connection ];
 			}
 			for (var i = 0; i < options.connection.length; i++) {
