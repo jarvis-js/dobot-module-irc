@@ -1,8 +1,6 @@
 var irc = require('irc');
 
-module.exports = function(bot) {
-
-	var module = new bot.Module();
+module.exports = function(bot, module) {
 
 	module.load = function(options) {
 		module.clients = [];
@@ -88,7 +86,5 @@ module.exports = function(bot) {
 		}
 		return false;
 	}
-
-	return module;
 
 };
