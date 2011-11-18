@@ -34,7 +34,7 @@ function IRCAdaptor(bot, options) {
 
 IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 	var _this = this;
-	var channel = this.getChannel('irc:' + this.client.opt.server + ':' + to, function(response) {
+	var channel = this.getChannel('irc:' + this.client.opt.server + ':' + to, true, function(response) {
 		var reply = response.reply;
 		if (response.type === 'command') {
 			reply = response.usernick + ': ' + reply;
@@ -66,13 +66,18 @@ IRCAdaptor.prototype.privateMessage = function(from, text, message) {
 	channel.emit('command', messageData);
 };
 
-IRCAdaptor.prototype.getChannel = function(channelID, say) {
+IRCAdaptor.prototype.getChannel = function(channelID, multiuser, say) {
+	if (say === undefined) {
+		say = multiuser;
+		multiuser = false;
+	}
 	if (this.bot.channels[channelID]) {
 		return this.bot.channels[channelID];
 	}
 	var channel = new this.bot.Channel();
 	channel.module = module.name;
 	channel.identifier = channelID;
+	channel.multiuser = multiuser;
 	channel.say = say;
 	this.bot.registerChannel(channel);
 	return channel;
