@@ -6,7 +6,7 @@ module.exports = function(bot, module) {
 		module.clients = [];
 
 		if (options.connection) {
-			if (!options.connection instanceof Array) {
+			if (!Array.isArray(options.connection)) {
 				options.connection = [ options.connection ];
 			}
 			for (var i = 0; i < options.connection.length; i++) {
