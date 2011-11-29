@@ -18,12 +18,6 @@ module.exports = function(bot, module) {
 		}
 	};
 
-	module.addTrigger('action', function(request) {
-		request.method = 'action';
-		request.reply = 'springs into action';
-		bot.respond(request);
-	});
-
 };
 
 function IRCAdaptor(bot, options) {
