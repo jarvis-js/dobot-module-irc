@@ -43,7 +43,8 @@ IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 	});
 	var messageData = {
 		message: text,
-		usernick: from
+		usernick: from,
+		userID: message.user + '@' + message.host
 	};
 	channel.emit('message', messageData);
 	var regex = new RegExp('^' + this.client.nick + ',? ', 'i');
@@ -62,7 +63,8 @@ IRCAdaptor.prototype.privateMessage = function(from, text, message) {
 	});
 	var messageData = {
 		message: text,
-		usernick: from
+		usernick: from,
+		userID: message.user + '@' + message.host
 	};
 	channel.emit('message', messageData);
 	channel.emit('command', messageData);
