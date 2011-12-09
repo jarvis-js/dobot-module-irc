@@ -33,10 +33,9 @@ function IRCAdaptor(bot, options) {
 IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 	var _this = this;
 	var channel = this.getChannel(this.client.opt.server + ':' + to, true, function(response) {
-		var reply = response.reply;
-		if (response.type === 'command') {
-			reply = response.usernick + ': ' + reply;
-		}
+		_this.client.say(to, response.reply);
+	}, function(response) {
+		var reply = response.usernick + ': ' + response.reply;
 		_this.client.say(to, reply);
 	}, function(response) {
 		_this.client.action(to, response.reply);
@@ -56,7 +55,9 @@ IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 
 IRCAdaptor.prototype.privateMessage = function(from, text, message) {
 	var _this = this;
-	var channel = this.getChannel(this.client.opt.server + ':' + from, function(response) {
+	var channel = this.getChannel(this.client.opt.server + ':' + from, false, function(response) {
+		_this.client.say(from, response.reply);
+	}, function(response) {
 		_this.client.say(from, response.reply);
 	}, function(response) {
 		_this.client.action(from, response.reply);
@@ -70,19 +71,15 @@ IRCAdaptor.prototype.privateMessage = function(from, text, message) {
 	channel.emit('command', messageData);
 };
 
-IRCAdaptor.prototype.getChannel = function(channelID, multiuser, say, action) {
+IRCAdaptor.prototype.getChannel = function(channelID, multiuser, say, reply, action) {
 	channelID = 'irc:' + channelID;
 	if (this.bot.channels[channelID]) {
 		return this.bot.channels[channelID];
 	}
-	if (action === undefined) {
-		action = say;
-		say = multiuser;
-		multiuser = false;
-	}
 	var channel = this.bot.createChannel(channelID);
 	channel.multiuser = multiuser;
 	channel.say = say;
+	channel.reply = reply;
 	channel.action = action;
 	return channel;
 };
