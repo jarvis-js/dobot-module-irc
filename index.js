@@ -28,7 +28,7 @@ function IRCAdaptor(bot, options) {
 	var _this = this;
 	this.client.on('message#', function(from, to, text, message) { _this.channelMessage(from, to, text, message); });
 	this.client.on('pm', function(from, text, message) { _this.privateMessage(from, text, message); });
-};
+}
 
 IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 	var _this = this;
