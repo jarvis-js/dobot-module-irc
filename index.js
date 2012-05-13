@@ -35,7 +35,7 @@ IRCAdaptor.prototype.channelMessage = function(from, to, text, message) {
 	var channel = this.getChannel(this.client.opt.server + ':' + to, true, function(response) {
 		_this.client.say(to, response.reply);
 	}, function(response) {
-		var reply = response.usernick + ': ' + response.reply;
+		var reply = response.user.usernick + ': ' + response.reply;
 		_this.client.say(to, reply);
 	}, function(response) {
 		_this.client.action(to, response.reply);
